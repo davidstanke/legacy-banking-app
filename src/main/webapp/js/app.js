@@ -169,7 +169,9 @@ $(function() {
         el: '#main-container',
         template: _.template($('#account-template').html()),
         events: {
-            'click .close-account': 'closeAccount'
+            'click .close-account': 'closeAccount',
+            'submit #inline-create-transaction-form': 'createTransaction',
+            'change #inline-create-transaction-form select[name="transactionType"]': 'toggleTargetAccount'
         },
         initialize: function() {
             this.transactions = new TransactionsCollection([], {accountId: this.model.id});
@@ -193,6 +195,37 @@ $(function() {
                 }
             });
             return this;
+        },
+        toggleTargetAccount: function(e) {
+            var type = $(e.target).val();
+            if (type === 'TRANSFER') {
+                this.$('#inline-target-account-group').show();
+            } else {
+                this.$('#inline-target-account-group').hide();
+            }
+        },
+        createTransaction: function(e) {
+            e.preventDefault();
+            var type = this.$('#inline-create-transaction-form select[name="transactionType"]').val();
+            var data = {
+                transactionType: type,
+                accountId: this.$('#inline-create-transaction-form input[name="accountId"]').val(),
+                amount: parseFloat(this.$('#inline-create-transaction-form input[name="amount"]').val())
+            };
+            if (type === 'TRANSFER') {
+                data.targetAccountId = this.$('#inline-create-transaction-form input[name="targetAccountId"]').val();
+            }
+
+            var txn = new Transaction();
+            txn.save(data, {
+                success: function(model, response) {
+                    alert('Transaction processed');
+                    Backbone.history.loadUrl(Backbone.history.fragment); // Reload
+                },
+                error: function(model, response) {
+                     alert('Error processing transaction: ' + (response.responseJSON ? response.responseJSON.message : response.statusText));
+                }
+            });
         },
         closeAccount: function() {
             // Simulate closing by updating status (if API supported it fully)
