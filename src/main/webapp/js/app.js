@@ -89,11 +89,31 @@ $(function() {
         el: '#main-container',
         template: _.template($('#customer-template').html()),
         events: {
-            'click .delete-customer': 'deleteCustomer'
+            'click .delete-customer': 'deleteCustomer',
+            'submit #inline-create-account-form': 'createAccount'
         },
         render: function() {
             this.$el.html(this.template(this.model.toJSON()));
             return this;
+        },
+        createAccount: function(e) {
+            e.preventDefault();
+            var data = {
+                customerId: this.$('input[name="customerId"]').val(),
+                productCode: this.$('select[name="productCode"]').val(),
+                balance: parseFloat(this.$('input[name="balance"]').val())
+            };
+
+            var account = new Account();
+            account.save(data, {
+                success: function(model, response) {
+                    alert('Account created');
+                    Backbone.history.loadUrl(Backbone.history.fragment); // Reload
+                },
+                error: function(model, response) {
+                    alert('Error creating account: ' + (response.responseJSON ? response.responseJSON.message : response.statusText));
+                }
+            });
         },
         deleteCustomer: function() {
             if(confirm('Are you sure?')) {
