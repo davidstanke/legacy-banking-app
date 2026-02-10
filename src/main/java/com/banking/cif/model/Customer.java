@@ -4,7 +4,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 
 public class Customer {
-    private String customerId; // UUID
+    private Integer customerId; // Integer ID
     private String cifNumber;
     private String firstName;
     private String lastName;
@@ -23,8 +23,8 @@ public class Customer {
     private Timestamp updatedAt;
     private java.util.List<Account> accounts;
 
-    public String getCustomerId() { return customerId; }
-    public void setCustomerId(String customerId) { this.customerId = customerId; }
+    public Integer getCustomerId() { return customerId; }
+    public void setCustomerId(Integer customerId) { this.customerId = customerId; }
 
     public String getCifNumber() { return cifNumber; }
     public void setCifNumber(String cifNumber) { this.cifNumber = cifNumber; }

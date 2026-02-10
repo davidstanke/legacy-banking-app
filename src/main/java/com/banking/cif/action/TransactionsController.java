@@ -41,7 +41,8 @@ public class TransactionsController implements ModelDriven<Object> {
     // Custom method for GET /api/v1/transactions/account/{accountId}
     public String listByAccount() {
         try {
-            list = service.getTransactions(accountId);
+            Integer intAccountId = Integer.parseInt(accountId);
+            list = service.getTransactions(intAccountId);
             return "index"; // Maps to JSON result
         } catch (Exception e) {
              status = 400;
@@ -59,6 +60,13 @@ public class TransactionsController implements ModelDriven<Object> {
 
     @Override
     public Object getModel() {
+        if (message != null) {
+            java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("status", status);
+            errorResponse.put("error", error);
+            errorResponse.put("message", message);
+            return errorResponse;
+        }
         return (list != null ? list : model);
     }
 

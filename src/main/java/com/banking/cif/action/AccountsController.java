@@ -8,6 +8,11 @@ import org.apache.struts2.rest.HttpHeaders;
 
 public class AccountsController implements ModelDriven<Object> {
     
+    // Ensure DB is initialized
+    static {
+        com.banking.cif.util.DatabaseInitializer.initialize();
+    }
+
     private String id;
     private Account model = new Account();
     private BankingService service = new BankingService();
@@ -19,12 +24,36 @@ public class AccountsController implements ModelDriven<Object> {
 
     // GET /api/v1/accounts/{id}
     public HttpHeaders show() {
+        System.out.println("AccountsController.show() called with id: [" + id + "]");
+        if (id == null || id.isEmpty()) {
+            status = 400;
+            error = "Bad Request";
+            message = "Account ID is missing";
+            return new DefaultHttpHeaders("show").withStatus(400);
+        }
+        
+        // Clean up ID (strip potential extensions or trailing dots/spaces)
+        String cleanId = id.trim();
+        if (cleanId.endsWith(".json")) {
+            cleanId = cleanId.substring(0, cleanId.length() - 5);
+        }
+        System.out.println("AccountsController.show() cleaned id: [" + cleanId + "]");
+
         try {
-            model = service.getAccount(id);
+            Integer intId = Integer.parseInt(cleanId);
+            model = service.getAccount(intId);
+            System.out.println("AccountsController.show() found account: " + model.getAccountId());
+        } catch (NumberFormatException nfe) {
+            System.err.println("AccountsController.show() invalid ID format: " + cleanId);
+            status = 400;
+            error = "Bad Request";
+            message = "Invalid Account ID format: " + cleanId;
+            return new DefaultHttpHeaders("show").withStatus(400);
         } catch (Exception e) {
+            System.err.println("AccountsController.show() account not found: " + e.getMessage());
             status = 404;
             error = "Not Found";
-            message = e.getMessage();
+            message = "Account not found for ID: " + cleanId;
             return new DefaultHttpHeaders("show").withStatus(404);
         }
         return new DefaultHttpHeaders("show").disableCaching();
@@ -47,11 +76,12 @@ public class AccountsController implements ModelDriven<Object> {
     // PUT/PATCH /api/v1/accounts/{id} (Simulating PATCH /status)
     public HttpHeaders update() {
         try {
+            Integer intId = Integer.parseInt(id);
             // Check if it's a status update
             if (model.getStatus() != null) {
-                service.updateAccountStatus(id, model.getStatus());
+                service.updateAccountStatus(intId, model.getStatus());
                 // Refresh model to return updated object
-                model = service.getAccount(id);
+                model = service.getAccount(intId);
                 return new DefaultHttpHeaders("update").withStatus(200);
             }
             return new DefaultHttpHeaders("update").withStatus(200);
@@ -68,6 +98,13 @@ public class AccountsController implements ModelDriven<Object> {
 
     @Override
     public Object getModel() {
+        if (message != null) {
+            java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("status", status);
+            errorResponse.put("error", error);
+            errorResponse.put("message", message);
+            return errorResponse;
+        }
         return model;
     }
 

@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 
 public class Transaction {
     private String transactionId; // UUID
-    private String accountId; // UUID
+    private Integer accountId; // Integer ID
     private String referenceCode;
     private String transactionType;
     private BigDecimal amount;
@@ -17,8 +17,8 @@ public class Transaction {
     public String getTransactionId() { return transactionId; }
     public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
 
-    public String getAccountId() { return accountId; }
-    public void setAccountId(String accountId) { this.accountId = accountId; }
+    public Integer getAccountId() { return accountId; }
+    public void setAccountId(Integer accountId) { this.accountId = accountId; }
 
     public String getReferenceCode() { return referenceCode; }
     public void setReferenceCode(String referenceCode) { this.referenceCode = referenceCode; }

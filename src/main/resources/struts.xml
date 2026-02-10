@@ -6,13 +6,6 @@
 <struts>
     <constant name="struts.devMode" value="true" />
     <constant name="struts.mapper.class" value="rest" />
-    <constant name="struts.convention.action.suffix" value="Controller"/>
-    <constant name="struts.convention.action.mapAllMatches" value="true"/>
-    <constant name="struts.convention.default.parent.package" value="rest-default"/>
-    <constant name="struts.convention.package.locators" value="action"/>
-    <constant name="struts.convention.package.locators.basePackage" value="com.banking.cif"/>
-    <constant name="struts.convention.excludeParentClassLoader" value="true" />
-    <constant name="struts.convention.action.packages" value="com.banking.cif.none"/>
     
     <!-- Rest plugin configuration -->
     <constant name="struts.rest.namespace" value="/api/v1"/>
@@ -21,20 +14,9 @@
     <constant name="struts.rest.content.restrictToGET" value="false"/>
 
     <package name="api-v1" extends="rest-default" namespace="/api/v1">
-        <!-- Manually map actions because Convention plugin scanning fails on high Java versions -->
-        <action name="customers/*" class="com.banking.cif.action.CustomersController">
-            <param name="id">{1}</param>
-        </action>
+        <!-- Let REST plugin handle standard RESTful mappings -->
         <action name="customers" class="com.banking.cif.action.CustomersController"/>
-        
-        <action name="accounts/*" class="com.banking.cif.action.AccountsController">
-            <param name="id">{1}</param>
-        </action>
         <action name="accounts" class="com.banking.cif.action.AccountsController"/>
-
-        <action name="transactions/*" class="com.banking.cif.action.TransactionsController">
-            <param name="id">{1}</param>
-        </action>
         <action name="transactions" class="com.banking.cif.action.TransactionsController"/>
     </package>
 

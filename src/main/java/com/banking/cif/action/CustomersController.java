@@ -36,30 +36,49 @@ public class CustomersController implements ModelDriven<Object> {
 
     // GET /api/v1/customers/{id}
     public HttpHeaders show() {
+        if (id == null || id.isEmpty()) {
+            status = 400;
+            error = "Bad Request";
+            message = "Customer ID is missing";
+            return new DefaultHttpHeaders("show").withStatus(400);
+        }
+
+        // Clean up ID (strip potential extensions or trailing dots/spaces)
+        String cleanId = id.trim();
+        if (cleanId.endsWith(".json")) {
+            cleanId = cleanId.substring(0, cleanId.length() - 5);
+        }
+
         try {
-            model = service.getCustomer(id);
+            Integer intId = Integer.parseInt(cleanId);
+            model = service.getCustomer(intId);
             if (model != null) {
                 model.setAccounts(service.getAccountsByCustomerId(model.getCustomerId()));
             }
-        } catch (Exception e) {
+        } catch (NumberFormatException nfe) {
             // If ID not found, try Name
             try {
-                List<Customer> customers = service.getCustomersByName(id);
+                List<Customer> customers = service.getCustomersByName(cleanId);
                 if (customers != null && !customers.isEmpty()) {
                     model = customers.get(0); // Take the first match for lookup
                     model.setAccounts(service.getAccountsByCustomerId(model.getCustomerId()));
                 } else {
                     status = 404;
                     error = "Not Found";
-                    message = "Customer not found by ID or Name: " + id;
+                    message = "Customer not found by ID or Name: " + cleanId;
                     return new DefaultHttpHeaders("show").withStatus(404);
                 }
             } catch (Exception ex) {
                 status = 404;
                 error = "Not Found";
-                message = e.getMessage();
+                message = ex.getMessage();
                 return new DefaultHttpHeaders("show").withStatus(404);
             }
+        } catch (Exception e) {
+            status = 404;
+            error = "Not Found";
+            message = e.getMessage();
+            return new DefaultHttpHeaders("show").withStatus(404);
         }
         return new DefaultHttpHeaders("show").disableCaching();
     }
@@ -103,6 +122,13 @@ public class CustomersController implements ModelDriven<Object> {
 
     @Override
     public Object getModel() {
+        if (message != null) {
+            java.util.Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("status", status);
+            errorResponse.put("error", error);
+            errorResponse.put("message", message);
+            return errorResponse;
+        }
         return (list != null ? list : model);
     }
 

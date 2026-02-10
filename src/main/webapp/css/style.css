@@ -159,3 +159,12 @@ label {
     border-bottom: 1px solid #CCC;
     font-size: 12px;
 }
+
+.text-danger {
+    color: #990000;
+}
+
+.bg-danger-light {
+    background-color: #FFF0F0;
+    border-color: #CC0000;
+}

@@ -3,13 +3,11 @@ package com.banking.cif.dao;
 import com.banking.cif.model.Account;
 import com.banking.cif.util.DBConnection;
 import java.sql.*;
-import java.util.UUID;
 import java.math.BigDecimal;
 
 public class AccountDAO {
 
     public Account create(Account account) throws SQLException {
-        account.setAccountId(UUID.randomUUID().toString());
         // Generate account number? Demo logic: Time-based or Random
         if (account.getAccountNumber() == null) {
             account.setAccountNumber(String.valueOf(System.currentTimeMillis())); 
@@ -17,36 +15,40 @@ public class AccountDAO {
         account.setStatus("ACTIVE");
         account.setBalance(BigDecimal.ZERO);
 
-        String sql = "INSERT INTO accounts (account_id, customer_id, product_code, account_number, currency_code, balance, status) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (customer_id, product_code, account_number, balance, status) " +
+                     "VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
-            pstmt.setString(1, account.getAccountId());
-            pstmt.setString(2, account.getCustomerId());
-            pstmt.setString(3, account.getProductCode());
-            pstmt.setString(4, account.getAccountNumber());
-            pstmt.setString(5, account.getCurrencyCode());
-            pstmt.setBigDecimal(6, account.getBalance());
-            pstmt.setString(7, account.getStatus());
+            pstmt.setInt(1, account.getCustomerId());
+            pstmt.setString(2, account.getProductCode());
+            pstmt.setString(3, account.getAccountNumber());
+            pstmt.setBigDecimal(4, account.getBalance());
+            pstmt.setString(5, account.getStatus());
             
             pstmt.executeUpdate();
+            
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    account.setAccountId(generatedKeys.getInt(1));
+                }
+            }
             return account;
         }
     }
 
-    public Account findById(String id) throws SQLException {
+    public Account findById(Integer id) throws SQLException {
         String sql = "SELECT * FROM accounts WHERE account_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, id);
+            pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     Account a = new Account();
-                    a.setAccountId(rs.getString("account_id"));
-                    a.setCustomerId(rs.getString("customer_id"));
+                    a.setAccountId(rs.getInt("account_id"));
+                    a.setCustomerId(rs.getInt("customer_id"));
                     a.setProductCode(rs.getString("product_code"));
                     a.setAccountNumber(rs.getString("account_number"));
                     a.setBalance(rs.getBigDecimal("balance"));
@@ -59,28 +61,28 @@ public class AccountDAO {
         return null;
     }
 
-    public void updateStatus(String id, String status) throws SQLException {
+    public void updateStatus(Integer id, String status) throws SQLException {
         String sql = "UPDATE accounts SET status = ? WHERE account_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, status);
-            pstmt.setString(2, id);
+            pstmt.setInt(2, id);
             pstmt.executeUpdate();
         }
     }
 
-    public java.util.List<Account> findByCustomerId(String customerId) throws SQLException {
+    public java.util.List<Account> findByCustomerId(Integer customerId) throws SQLException {
         java.util.List<Account> accounts = new java.util.ArrayList<>();
         String sql = "SELECT * FROM accounts WHERE customer_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, customerId);
+            pstmt.setInt(1, customerId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Account a = new Account();
-                    a.setAccountId(rs.getString("account_id"));
-                    a.setCustomerId(rs.getString("customer_id"));
+                    a.setAccountId(rs.getInt("account_id"));
+                    a.setCustomerId(rs.getInt("customer_id"));
                     a.setProductCode(rs.getString("product_code"));
                     a.setAccountNumber(rs.getString("account_number"));
                     a.setBalance(rs.getBigDecimal("balance"));
@@ -94,24 +96,24 @@ public class AccountDAO {
     }
     
     // For transactions - update balance
-    public void updateBalance(Connection conn, String accountId, BigDecimal newBalance) throws SQLException {
+    public void updateBalance(Connection conn, Integer accountId, BigDecimal newBalance) throws SQLException {
         String sql = "UPDATE accounts SET balance = ? WHERE account_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setBigDecimal(1, newBalance);
-            pstmt.setString(2, accountId);
+            pstmt.setInt(2, accountId);
             pstmt.executeUpdate();
         }
     }
     
     // Helper to get with specific connection (for transaction usage)
-    public Account findById(Connection conn, String id) throws SQLException {
+    public Account findById(Connection conn, Integer id) throws SQLException {
         String sql = "SELECT * FROM accounts WHERE account_id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, id);
+            pstmt.setInt(1, id);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     Account a = new Account();
-                    a.setAccountId(rs.getString("account_id"));
+                    a.setAccountId(rs.getInt("account_id"));
                     a.setBalance(rs.getBigDecimal("balance"));
                     // ... other fields needed for validation
                     return a;

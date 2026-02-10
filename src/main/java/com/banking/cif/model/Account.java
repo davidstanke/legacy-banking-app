@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 public class Account {
-    private String accountId; // UUID
-    private String customerId; // UUID
+    private Integer accountId; // Integer ID
+    private Integer customerId; // Integer ID
     private String productCode;
     private String accountNumber;
     private String iban;
@@ -17,11 +17,11 @@ public class Account {
     private Timestamp closedAt;
     private String configurations; // JSON
 
-    public String getAccountId() { return accountId; }
-    public void setAccountId(String accountId) { this.accountId = accountId; }
+    public Integer getAccountId() { return accountId; }
+    public void setAccountId(Integer accountId) { this.accountId = accountId; }
 
-    public String getCustomerId() { return customerId; }
-    public void setCustomerId(String customerId) { this.customerId = customerId; }
+    public Integer getCustomerId() { return customerId; }
+    public void setCustomerId(Integer customerId) { this.customerId = customerId; }
 
     public String getProductCode() { return productCode; }
     public void setProductCode(String productCode) { this.productCode = productCode; }

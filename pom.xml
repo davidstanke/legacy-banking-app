@@ -79,11 +79,6 @@
         <artifactId>struts2-rest-plugin</artifactId>
         <version>${struts.version}</version>
     </dependency>
-    <dependency>
-        <groupId>org.apache.struts</groupId>
-        <artifactId>struts2-convention-plugin</artifactId>
-        <version>${struts.version}</version>
-    </dependency>
 
     <!-- Servlet API -->
     <dependency>

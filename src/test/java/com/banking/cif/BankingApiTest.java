@@ -59,7 +59,7 @@ public class BankingApiTest {
 
     @Test
     public void test03_CreateAccountSuccess() throws Exception {
-        String customerId = createHelperCustomer("Bob", "bob.api@example.com", "CIF-BOB-API");
+        Integer customerId = createHelperCustomer("Bob", "bob.api@example.com", "CIF-BOB-API");
         
         AccountsController action = new AccountsController();
         Account a = (Account) action.getModel();
@@ -69,17 +69,25 @@ public class BankingApiTest {
 
         action.create();
         assertEquals(201, action.getStatus());
-        assertNotNull(a.getAccountId());
+        Integer accountId = a.getAccountId();
+        assertNotNull(accountId);
         assertEquals("ACTIVE", a.getStatus());
+
+        // Test Show
+        AccountsController showAction = new AccountsController();
+        showAction.setId(String.valueOf(accountId));
+        showAction.show();
+        Account retrieved = (Account) showAction.getModel();
+        assertEquals(accountId, retrieved.getAccountId());
     }
     
     @Test
     public void test04_UpdateAccountStatus() throws Exception {
-        String customerId = createHelperCustomer("Charlie", "charlie.api@example.com", "CIF-CHARLIE-API");
-        String accountId = createHelperAccount(customerId);
+        Integer customerId = createHelperCustomer("Charlie", "charlie.api@example.com", "CIF-CHARLIE-API");
+        Integer accountId = createHelperAccount(customerId);
 
         AccountsController action = new AccountsController();
-        action.setId(accountId);
+        action.setId(String.valueOf(accountId));
         Account a = (Account) action.getModel();
         a.setStatus("FROZEN");
 
@@ -95,8 +103,8 @@ public class BankingApiTest {
 
     @Test
     public void test05_DepositSuccess() throws Exception {
-        String customerId = createHelperCustomer("Dave", "dave.api@example.com", "CIF-DAVE-API");
-        String accountId = createHelperAccount(customerId);
+        Integer customerId = createHelperCustomer("Dave", "dave.api@example.com", "CIF-DAVE-API");
+        Integer accountId = createHelperAccount(customerId);
 
         TransactionsController action = new TransactionsController();
         Transaction t = (Transaction) action.getModel();
@@ -112,8 +120,8 @@ public class BankingApiTest {
 
     @Test
     public void test06_WithdrawalInsufficient() throws Exception {
-        String customerId = createHelperCustomer("Eve", "eve.api@example.com", "CIF-EVE-API");
-        String accountId = createHelperAccount(customerId);
+        Integer customerId = createHelperCustomer("Eve", "eve.api@example.com", "CIF-EVE-API");
+        Integer accountId = createHelperAccount(customerId);
         
         // Deposit 100 via Service
         createHelperTransaction(accountId, "DEPOSIT", 100.00);
@@ -129,8 +137,20 @@ public class BankingApiTest {
         action.create();
         assertEquals(400, action.getStatus());
     }
+
+    @Test
+    public void test07_RetrievePreSeededAccount() throws Exception {
+        AccountsController action = new AccountsController();
+        action.setId("1");
+        action.show();
+        
+        assertEquals(0, action.getStatus()); // 0 is default if no error set
+        Account a = (Account) action.getModel();
+        assertEquals(Integer.valueOf(1), a.getAccountId());
+        assertEquals(Integer.valueOf(1), a.getCustomerId());
+    }
     
-    private String createHelperCustomer(String name, String email, String cif) throws Exception {
+    private Integer createHelperCustomer(String name, String email, String cif) throws Exception {
         Customer c = new Customer();
         c.setFirstName(name);
         c.setLastName("Helper");
@@ -140,7 +160,7 @@ public class BankingApiTest {
         return new com.banking.cif.service.BankingService().createCustomer(c).getCustomerId();
     }
     
-    private String createHelperAccount(String customerId) throws Exception {
+    private Integer createHelperAccount(Integer customerId) throws Exception {
         Account a = new Account();
         a.setCustomerId(customerId);
         a.setProductCode("CHK-STD");
@@ -148,7 +168,7 @@ public class BankingApiTest {
         return new com.banking.cif.service.BankingService().createAccount(a).getAccountId();
     }
     
-    private void createHelperTransaction(String accountId, String type, double amount) throws Exception {
+    private void createHelperTransaction(Integer accountId, String type, double amount) throws Exception {
         Transaction t = new Transaction();
         t.setAccountId(accountId);
         t.setTransactionType(type);

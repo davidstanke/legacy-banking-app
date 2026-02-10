@@ -45,7 +45,7 @@ public class BankingServiceTest {
         c.setEmail("bob.service@example.com");
         c.setDateOfBirth(Date.valueOf("1990-01-01"));
         c.setCifNumber("CIF-SERVICE-002");
-        String customerId = service.createCustomer(c).getCustomerId();
+        Integer customerId = service.createCustomer(c).getCustomerId();
 
         Account a = new Account();
         a.setCustomerId(customerId);
@@ -65,13 +65,13 @@ public class BankingServiceTest {
         c.setEmail("charlie.service@example.com");
         c.setDateOfBirth(Date.valueOf("1990-01-01"));
         c.setCifNumber("CIF-SERVICE-003");
-        String customerId = service.createCustomer(c).getCustomerId();
+        Integer customerId = service.createCustomer(c).getCustomerId();
 
         Account a = new Account();
         a.setCustomerId(customerId);
         a.setProductCode("CHK-STD");
         a.setCurrencyCode("USD");
-        String accountId = service.createAccount(a).getAccountId();
+        Integer accountId = service.createAccount(a).getAccountId();
 
         // Deposit
         Transaction t1 = new Transaction();
@@ -102,7 +102,7 @@ public class BankingServiceTest {
         c.setEmail("eve.service@example.com");
         c.setDateOfBirth(Date.valueOf("1990-01-01"));
         c.setCifNumber("CIF-SERVICE-005");
-        String customerId = service.createCustomer(c).getCustomerId();
+        Integer customerId = service.createCustomer(c).getCustomerId();
 
         Account a1 = new Account();
         a1.setCustomerId(customerId);
@@ -128,13 +128,13 @@ public class BankingServiceTest {
         c.setEmail("dave.service@example.com");
         c.setDateOfBirth(Date.valueOf("1990-01-01"));
         c.setCifNumber("CIF-SERVICE-004");
-        String customerId = service.createCustomer(c).getCustomerId();
+        Integer customerId = service.createCustomer(c).getCustomerId();
 
         Account a = new Account();
         a.setCustomerId(customerId);
         a.setProductCode("CHK-STD");
         a.setCurrencyCode("USD");
-        String accountId = service.createAccount(a).getAccountId();
+        Integer accountId = service.createAccount(a).getAccountId();
 
         Transaction t = new Transaction();
         t.setAccountId(accountId);

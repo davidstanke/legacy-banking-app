@@ -17,7 +17,7 @@ public class TransactionDAO {
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, transaction.getTransactionId());
-            pstmt.setString(2, transaction.getAccountId());
+            pstmt.setInt(2, transaction.getAccountId());
             pstmt.setString(3, transaction.getTransactionType());
             pstmt.setBigDecimal(4, transaction.getAmount());
             pstmt.setString(5, transaction.getCurrencyCode());
@@ -29,18 +29,18 @@ public class TransactionDAO {
         }
     }
 
-    public List<Transaction> findByAccountId(String accountId) throws SQLException {
+    public List<Transaction> findByAccountId(Integer accountId) throws SQLException {
         List<Transaction> list = new ArrayList<>();
         String sql = "SELECT * FROM transactions WHERE account_id = ? ORDER BY transaction_date DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, accountId);
+            pstmt.setInt(1, accountId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Transaction t = new Transaction();
                     t.setTransactionId(rs.getString("transaction_id"));
-                    t.setAccountId(rs.getString("account_id"));
+                    t.setAccountId(rs.getInt("account_id"));
                     t.setTransactionType(rs.getString("transaction_type"));
                     t.setAmount(rs.getBigDecimal("amount"));
                     t.setBalanceAfter(rs.getBigDecimal("balance_after"));

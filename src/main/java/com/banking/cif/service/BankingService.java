@@ -36,7 +36,7 @@ public class BankingService {
         return customerDAO.create(customer);
     }
 
-    public Customer getCustomer(String id) throws Exception {
+    public Customer getCustomer(Integer id) throws Exception {
         Customer c = customerDAO.findById(id);
         if (c == null) throw new Exception("Customer not found");
         return c;
@@ -61,17 +61,17 @@ public class BankingService {
         return accountDAO.create(account);
     }
 
-    public Account getAccount(String id) throws Exception {
+    public Account getAccount(Integer id) throws Exception {
         Account a = accountDAO.findById(id);
         if (a == null) throw new Exception("Account not found");
         return a;
     }
 
-    public List<Account> getAccountsByCustomerId(String customerId) throws Exception {
+    public List<Account> getAccountsByCustomerId(Integer customerId) throws Exception {
         return accountDAO.findByCustomerId(customerId);
     }
 
-    public void updateAccountStatus(String id, String status) throws Exception {
+    public void updateAccountStatus(Integer id, String status) throws Exception {
         if (accountDAO.findById(id) == null) throw new Exception("Account not found");
         accountDAO.updateStatus(id, status);
     }
@@ -117,7 +117,7 @@ public class BankingService {
         }
     }
 
-    public List<Transaction> getTransactions(String accountId) throws Exception {
+    public List<Transaction> getTransactions(Integer accountId) throws Exception {
         return transactionDAO.findByAccountId(accountId);
     }
 }

@@ -211,7 +211,6 @@ $(function() {
         createAccount: function(e) {
             e.preventDefault();
             var data = {
-                accountId: this.$('input[name="accountId"]').val(),
                 customerId: this.$('input[name="customerId"]').val(),
                 productCode: this.$('select[name="productCode"]').val(),
                 balance: parseFloat(this.$('input[name="balance"]').val())
@@ -274,6 +273,15 @@ $(function() {
         }
     });
 
+    var ErrorView = Backbone.View.extend({
+        el: '#main-container',
+        template: _.template($('#error-template').html()),
+        render: function(message) {
+            this.$el.html(this.template({message: message}));
+            return this;
+        }
+    });
+
     // --- Router ---
 
     var AppRouter = Backbone.Router.extend({
@@ -304,9 +312,9 @@ $(function() {
                     delete customer.url;
                     new CustomerView({model: customer}).render();
                 },
-                error: function() {
-                    alert('Customer not found');
-                    app.navigate('', {trigger: true});
+                error: function(model, response) {
+                    var msg = (response.responseJSON && response.responseJSON.message) ? response.responseJSON.message : 'Customer not found';
+                    new ErrorView().render(msg);
                 }
             });
         },
@@ -316,14 +324,14 @@ $(function() {
         },
 
         viewAccount: function(id) {
-            var account = new Account({id: id});
+            var account = new Account({accountId: id});
             account.fetch({
                 success: function() {
                     new AccountView({model: account}).render();
                 },
-                error: function() {
-                     alert('Account not found');
-                     app.navigate('', {trigger: true});
+                error: function(model, response) {
+                     var msg = (response.responseJSON && response.responseJSON.message) ? response.responseJSON.message : 'Account not found';
+                     new ErrorView().render(msg);
                 }
             });
         },
