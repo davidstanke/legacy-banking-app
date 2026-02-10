@@ -35,12 +35,13 @@ h1, h2, h3, h4, h5 {
 
 /* Layout */
 #wrapper {
-    display: flex;
-    min-height: 100vh;
+    width: 100%;
+    clear: both;
 }
 
 #sidebar {
-    width: 200px;
+    float: left;
+    width: 180px;
     background-color: #DDEEFF;
     border-right: 1px solid #6699CC;
     padding: 20px;
@@ -63,7 +64,7 @@ h1, h2, h3, h4, h5 {
 }
 
 #content {
-    flex-grow: 1;
+    margin-left: 221px;
     padding: 20px;
     background-color: white;
 }
@@ -117,8 +118,6 @@ h1, h2, h3, h4, h5 {
 .form-control {
     border: 1px solid #999;
     padding: 4px;
-    width: 100%;
-    box-sizing: border-box;
 }
 
 label {
@@ -151,7 +150,7 @@ label {
 
 /* Utility */
 .mb-3 {
-    margin-bottom: 1rem;
+    margin-bottom: 16px;
 }
 
 .top-nav {
