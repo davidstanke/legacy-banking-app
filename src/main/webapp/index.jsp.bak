@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Banking CIF App</title>
+    <!-- Bootstrap 3 and jQuery -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        body { padding-top: 50px; }
+        .container { max-width: 800px; }
+        .section { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">Banking CIF</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+    <div class="section" id="customer-section">
+        <h3>Create Customer</h3>
+        <form id="createCustomerForm">
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" class="form-control" name="firstName" required>
+            </div>
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" class="form-control" name="lastName" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" class="form-control" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>DOB (YYYY-MM-DD)</label>
+                <input type="text" class="form-control" name="dateOfBirth" placeholder="1990-01-01" required>
+            </div>
+            <div class="form-group">
+                <label>CIF Number</label>
+                <input type="text" class="form-control" name="cifNumber" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Customer</button>
+        </form>
+        <div id="customerResult" class="alert" style="display:none; margin-top:10px;"></div>
+    </div>
+
+    <div class="section" id="account-section">
+        <h3>Open Account</h3>
+        <form id="createAccountForm">
+            <div class="form-group">
+                <label>Customer ID</label>
+                <input type="text" class="form-control" name="customerId" id="accCustomerId" required>
+            </div>
+            <div class="form-group">
+                <label>Product Code</label>
+                <select class="form-control" name="productCode">
+                    <option value="CHK-STD">Standard Checking</option>
+                    <option value="SAV-HYS">High Yield Savings</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Currency</label>
+                <input type="text" class="form-control" name="currencyCode" value="USD" readonly>
+            </div>
+            <button type="submit" class="btn btn-success">Open Account</button>
+        </form>
+        <div id="accountResult" class="alert" style="display:none; margin-top:10px;"></div>
+    </div>
+
+    <div class="section" id="transaction-section">
+        <h3>Transaction</h3>
+        <form id="createTransactionForm">
+            <div class="form-group">
+                <label>Account ID</label>
+                <input type="text" class="form-control" name="accountId" id="txAccountId" required>
+            </div>
+            <div class="form-group">
+                <label>Type</label>
+                <select class="form-control" name="transactionType" id="txType">
+                    <option value="DEPOSIT">Deposit</option>
+                    <option value="WITHDRAWAL">Withdrawal</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" class="form-control" name="amount" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-warning">Submit Transaction</button>
+        </form>
+        <div id="transactionResult" class="alert" style="display:none; margin-top:10px;"></div>
+    </div>
+
+</div>
+
+<script>
+    function toJson(form) {
+        var array = $(form).serializeArray();
+        var json = {};
+        $.each(array, function() {
+            json[this.name] = this.value || '';
+        });
+        
+        // Struts 2 REST expects JSON directly?
+        // Note: type="DEPOSIT" needs to map to transactionType. The form name is transactionType which matches model.
+        
+        // Handle Transaction Type mapping if needed. Model has 'transactionType', form has 'transactionType'.
+        
+        return JSON.stringify(json);
+    }
+
+    $('#createCustomerForm').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: 'api/v1/customers', // Assuming deployed at root or relative
+            type: 'POST',
+            contentType: 'application/json',
+            data: toJson(this),
+            success: function(data) {
+                $('#customerResult').removeClass('alert-danger').addClass('alert-success').text('Created Customer ID: ' + data.customerId).show();
+                $('#accCustomerId').val(data.customerId); // Auto-fill
+            },
+            error: function(xhr) {
+                 $('#customerResult').removeClass('alert-success').addClass('alert-danger').text('Error: ' + xhr.responseText).show();
+            }
+        });
+    });
+
+    $('#createAccountForm').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: 'api/v1/accounts',
+            type: 'POST',
+            contentType: 'application/json',
+            data: toJson(this),
+            success: function(data) {
+                $('#accountResult').removeClass('alert-danger').addClass('alert-success').text('Created Account ID: ' + data.accountId).show();
+                $('#txAccountId').val(data.accountId); // Auto-fill
+            },
+            error: function(xhr) {
+                 $('#accountResult').removeClass('alert-success').addClass('alert-danger').text('Error: ' + xhr.responseText).show();
+            }
+        });
+    });
+
+    $('#createTransactionForm').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: 'api/v1/transactions',
+            type: 'POST',
+            contentType: 'application/json',
+            data: toJson(this),
+            success: function(data) {
+                $('#transactionResult').removeClass('alert-danger').addClass('alert-success').text('Transaction Successful. Balance: ' + data.balanceAfter).show();
+            },
+            error: function(xhr) {
+                 $('#transactionResult').removeClass('alert-success').addClass('alert-danger').text('Error: ' + xhr.responseText).show();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

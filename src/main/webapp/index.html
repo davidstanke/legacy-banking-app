@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Legacy Bank - Intranet</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="header">
+        <h1>Legacy Bank Corporate Intranet</h1>
+    </div>
+
+    <div class="top-nav">
+        <div align="right">
+            <form class="form-inline" id="lookup-customer-form" style="display:inline;">
+                Customer Search: <input class="form-control" type="text" placeholder="Name" id="nav-customer-id" style="width:120px;">
+                <button type="submit" class="btn">Go</button>
+            </form>
+            &nbsp;|&nbsp;
+             <form class="form-inline" id="lookup-account-form" style="display:inline;">
+                Account Search: <input class="form-control" type="text" placeholder="ID" id="nav-account-id" style="width:120px;">
+                <button type="submit" class="btn">Go</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="wrapper">
+        <div id="sidebar">
+            <h3>Navigation</h3>
+            <ul>
+                <li><a href="#">Dashboard</a></li>
+                <li><a href="#customers/new">New Customer</a></li>
+                <li><a href="#accounts/new">New Account</a></li>
+                <li><a href="#transactions/new">New Transaction</a></li>
+            </ul>
+            <div style="margin-top: 50px; font-size: 10px; color: #666;">
+                Legacy Bank CIF System v2.0<br>
+                Internal Use Only
+            </div>
+        </div>
+
+        <div id="content">
+            <div class="container" id="main-container">
+                <!-- Views will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <script type="text/template" id="home-template">
+        <div class="content-box">
+            <img src="images/legacy-bank.gif" alt="Legacy Bank Logo" width="300">
+            <h2>Welcome to the Employee Portal</h2>
+            <p>You are logged into the Legacy Bank Core Banking System. Use the navigation sidebar to perform customer and account operations.</p>
+            
+            <div class="card">
+                <div class="card-header">Internal Announcements</div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>System Maintenance:</strong> The CIF database will be down for maintenance this Saturday at midnight.</li>
+                        <li><strong>New 24H ATM:</strong> A new ATM has been successfully installed in the downtown branch.</li>
+                        <li><strong>Q1 Performance:</strong> Savings interest rates have been adjusted to 5.0%.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product Type</th>
+                        <th>Standard Rate</th>
+                        <th>Internal Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Savings</td>
+                        <td>5.0%</td>
+                        <td>12% Growth</td>
+                    </tr>
+                    <tr>
+                        <td>CD</td>
+                        <td>7.2%</td>
+                        <td>5% Retention</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </script>
+
+    <script type="text/template" id="customer-template">
+        <div class="card">
+            <div class="card-header">Customer Record: <%= firstName %> <%= lastName %></div>
+            <div class="card-body">
+                <p><strong>Customer ID:</strong> <%= customerId %></p>
+                <p><strong>CIF Number:</strong> <%= cifNumber %></p>
+                <p><strong>Email:</strong> <%= email %></p>
+                <p><strong>Date of Birth:</strong> <%= dateOfBirth %></p>
+                <p><strong>KYC Status:</strong> <%= kycStatus %></p>
+                <p><strong>Risk Rating:</strong> <%= riskRating %></p>
+                <hr>
+                <button class="btn btn-danger delete-customer">Delete Record</button>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="create-customer-template">
+        <h2>Register New Customer</h2>
+        <div class="card">
+            <div class="card-body">
+                <form id="create-customer-form">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" class="form-control" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" class="form-control" name="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date of Birth (YYYY-MM-DD)</label>
+                        <input type="text" class="form-control" name="dateOfBirth" placeholder="1990-01-01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CIF Number</label>
+                        <input type="text" class="form-control" name="cifNumber" required>
+                    </div>
+                    <button type="submit" class="btn">Submit Registration</button>
+                </form>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="account-template">
+        <div class="card mb-3">
+            <div class="card-header">Account Overview: <%= accountId %></div>
+            <div class="card-body">
+                <p><strong>Product Code:</strong> <%= productCode %></p>
+                <p><strong>Status:</strong> <%= status %></p>
+                <p><strong>Current Balance:</strong> <%= balance %></p>
+                <p><strong>Primary Owner ID:</strong> <%= customerId %></p>
+                <% if (status === 'OPEN') { %>
+                    <button class="btn close-account">Deactivate Account</button>
+                <% } %>
+            </div>
+        </div>
+
+        <h3>Recent Activity</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Transaction Type</th>
+                    <th>Amount</th>
+                    <th>Post Date</th>
+                </tr>
+            </thead>
+            <tbody id="transactions-list"></tbody>
+        </table>
+    </script>
+
+    <script type="text/template" id="transaction-row-template">
+        <td><%= transactionType %></td>
+        <td><%= amount %></td>
+        <td><%= transactionDate %></td>
+    </script>
+
+    <script type="text/template" id="create-account-template">
+        <h2>Open New Account</h2>
+        <div class="card">
+            <div class="card-body">
+                <form id="create-account-form">
+                    <div class="form-group">
+                        <label>Account ID</label>
+                        <input type="text" class="form-control" name="accountId" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Customer ID</label>
+                        <input type="text" class="form-control" name="customerId" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Product Type</label>
+                        <select class="form-control" name="productCode">
+                            <option value="CHK-STD">Standard Checking</option>
+                            <option value="SAV-HYS">High Yield Savings</option>
+                        </select>
+                    </div>
+                     <div class="form-group">
+                        <label>Opening Deposit</label>
+                        <input type="number" class="form-control" name="balance" value="0">
+                    </div>
+                    <button type="submit" class="btn">Initialize Account</button>
+                </form>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/template" id="create-transaction-template">
+        <h2>New Financial Transaction</h2>
+        <div class="card">
+            <div class="card-body">
+                <form id="create-transaction-form">
+                     <div class="form-group">
+                        <label>Operation</label>
+                        <select class="form-control" name="transactionType">
+                            <option value="DEPOSIT">Deposit</option>
+                            <option value="WITHDRAW">Withdraw</option>
+                            <option value="TRANSFER">Transfer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Source Account ID</label>
+                        <input type="text" class="form-control" name="accountId" required>
+                    </div>
+                     <div class="form-group" id="target-account-group" style="display:none;">
+                        <label>Destination Account ID</label>
+                        <input type="text" class="form-control" name="targetAccountId">
+                    </div>
+                    <div class="form-group">
+                        <label>Transaction Amount</label>
+                        <input type="number" class="form-control" name="amount" required>
+                    </div>
+                    <button type="submit" class="btn">Execute Transaction</button>
+                </form>
+            </div>
+        </div>
+    </script>
+
+    <!-- Scripts -->
+    <script src="js/lib/jquery.min.js"></script>
+    <script src="js/lib/underscore.min.js"></script>
+    <script src="js/lib/backbone.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
