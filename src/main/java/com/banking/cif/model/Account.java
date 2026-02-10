@@ -10,7 +10,6 @@ public class Account {
     private String accountNumber;
     private String iban;
     private BigDecimal balance;
-    private String currencyCode;
     private BigDecimal overdraftLimit;
     private String status;
     private Timestamp openedAt;
@@ -34,9 +33,6 @@ public class Account {
 
     public BigDecimal getBalance() { return balance; }
     public void setBalance(BigDecimal balance) { this.balance = balance; }
-
-    public String getCurrencyCode() { return currencyCode; }
-    public void setCurrencyCode(String currencyCode) { this.currencyCode = currencyCode; }
 
     public BigDecimal getOverdraftLimit() { return overdraftLimit; }
     public void setOverdraftLimit(BigDecimal overdraftLimit) { this.overdraftLimit = overdraftLimit; }

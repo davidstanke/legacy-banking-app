@@ -50,7 +50,6 @@ public class BankingServiceTest {
         Account a = new Account();
         a.setCustomerId(customerId);
         a.setProductCode("CHK-STD");
-        a.setCurrencyCode("USD");
         
         Account created = service.createAccount(a);
         assertNotNull(created.getAccountId());
@@ -70,7 +69,6 @@ public class BankingServiceTest {
         Account a = new Account();
         a.setCustomerId(customerId);
         a.setProductCode("CHK-STD");
-        a.setCurrencyCode("USD");
         Integer accountId = service.createAccount(a).getAccountId();
 
         // Deposit
@@ -78,7 +76,6 @@ public class BankingServiceTest {
         t1.setAccountId(accountId);
         t1.setTransactionType("DEPOSIT");
         t1.setAmount(new BigDecimal("100.00"));
-        t1.setCurrencyCode("USD");
         
         Transaction result1 = service.processTransaction(t1);
         assertEquals(0, new BigDecimal("100.00").compareTo(result1.getBalanceAfter()));
@@ -88,7 +85,6 @@ public class BankingServiceTest {
         t2.setAccountId(accountId);
         t2.setTransactionType("WITHDRAWAL");
         t2.setAmount(new BigDecimal("40.00"));
-        t2.setCurrencyCode("USD");
         
         Transaction result2 = service.processTransaction(t2);
         assertEquals(0, new BigDecimal("60.00").compareTo(result2.getBalanceAfter()));
@@ -107,13 +103,11 @@ public class BankingServiceTest {
         Account a1 = new Account();
         a1.setCustomerId(customerId);
         a1.setProductCode("CHK-STD");
-        a1.setCurrencyCode("USD");
         service.createAccount(a1);
 
         Account a2 = new Account();
         a2.setCustomerId(customerId);
         a2.setProductCode("SAV-HYS");
-        a2.setCurrencyCode("USD");
         service.createAccount(a2);
 
         java.util.List<Account> accounts = service.getAccountsByCustomerId(customerId);
@@ -133,14 +127,12 @@ public class BankingServiceTest {
         Account a = new Account();
         a.setCustomerId(customerId);
         a.setProductCode("CHK-STD");
-        a.setCurrencyCode("USD");
         Integer accountId = service.createAccount(a).getAccountId();
 
         Transaction t = new Transaction();
         t.setAccountId(accountId);
         t.setTransactionType("WITHDRAWAL");
         t.setAmount(new BigDecimal("100.00"));
-        t.setCurrencyCode("USD");
         
         service.processTransaction(t); // Should throw Exception
     }

@@ -5,26 +5,27 @@ import com.banking.cif.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class TransactionDAO {
 
     public Transaction create(Connection conn, Transaction transaction) throws SQLException {
-        transaction.setTransactionId(UUID.randomUUID().toString());
-        
-        String sql = "INSERT INTO transactions (transaction_id, account_id, transaction_type, amount, currency_code, description, balance_after) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transactions (account_id, transaction_type, amount, description, balance_after) " +
+                     "VALUES (?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, transaction.getTransactionId());
-            pstmt.setInt(2, transaction.getAccountId());
-            pstmt.setString(3, transaction.getTransactionType());
-            pstmt.setBigDecimal(4, transaction.getAmount());
-            pstmt.setString(5, transaction.getCurrencyCode());
-            pstmt.setString(6, transaction.getDescription());
-            pstmt.setBigDecimal(7, transaction.getBalanceAfter());
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setInt(1, transaction.getAccountId());
+            pstmt.setString(2, transaction.getTransactionType());
+            pstmt.setBigDecimal(3, transaction.getAmount());
+            pstmt.setString(4, transaction.getDescription());
+            pstmt.setBigDecimal(5, transaction.getBalanceAfter());
             
             pstmt.executeUpdate();
+            
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    transaction.setTransactionId(generatedKeys.getInt(1));
+                }
+            }
             return transaction;
         }
     }
@@ -39,13 +40,14 @@ public class TransactionDAO {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Transaction t = new Transaction();
-                    t.setTransactionId(rs.getString("transaction_id"));
+                    t.setTransactionId(rs.getInt("transaction_id"));
                     t.setAccountId(rs.getInt("account_id"));
+                    t.setReferenceCode(rs.getString("reference_code"));
                     t.setTransactionType(rs.getString("transaction_type"));
                     t.setAmount(rs.getBigDecimal("amount"));
-                    t.setBalanceAfter(rs.getBigDecimal("balance_after"));
                     t.setDescription(rs.getString("description"));
-                    // ...
+                    t.setTransactionDate(rs.getTimestamp("transaction_date"));
+                    t.setBalanceAfter(rs.getBigDecimal("balance_after"));
                     list.add(t);
                 }
             }

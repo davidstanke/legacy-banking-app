@@ -4,18 +4,17 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 public class Transaction {
-    private String transactionId; // UUID
+    private Integer transactionId; // SERIAL
     private Integer accountId; // Integer ID
     private String referenceCode;
     private String transactionType;
     private BigDecimal amount;
-    private String currencyCode;
     private String description;
     private Timestamp transactionDate;
     private BigDecimal balanceAfter;
 
-    public String getTransactionId() { return transactionId; }
-    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
+    public Integer getTransactionId() { return transactionId; }
+    public void setTransactionId(Integer transactionId) { this.transactionId = transactionId; }
 
     public Integer getAccountId() { return accountId; }
     public void setAccountId(Integer accountId) { this.accountId = accountId; }
@@ -28,9 +27,6 @@ public class Transaction {
 
     public BigDecimal getAmount() { return amount; }
     public void setAmount(BigDecimal amount) { this.amount = amount; }
-
-    public String getCurrencyCode() { return currencyCode; }
-    public void setCurrencyCode(String currencyCode) { this.currencyCode = currencyCode; }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }

@@ -116,7 +116,7 @@
                                 <tr>
                                     <td><%= account.accountNumber %></td>
                                     <td><%= account.productCode %></td>
-                                    <td><%= account.currencyCode %> <%= account.balance %></td>
+                                    <td><%= account.balance %></td>
                                     <td><%= account.status %></td>
                                     <td><a href="#accounts/<%= account.accountId %>" class="btn btn-small">View</a></td>
                                 </tr>
@@ -231,7 +231,7 @@
                         <label>Operation</label>
                         <select class="form-control" name="transactionType">
                             <option value="DEPOSIT">Deposit</option>
-                            <option value="WITHDRAW">Withdraw</option>
+                            <option value="WITHDRAWAL">Withdraw</option>
                             <option value="TRANSFER">Transfer</option>
                         </select>
                     </div>

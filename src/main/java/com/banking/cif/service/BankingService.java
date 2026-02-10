@@ -91,7 +91,7 @@ public class BankingService {
                 BigDecimal newBalance = account.getBalance();
                 if ("DEPOSIT".equals(transaction.getTransactionType())) {
                     newBalance = newBalance.add(transaction.getAmount());
-                } else if ("WITHDRAWAL".equals(transaction.getTransactionType())) {
+                } else if ("WITHDRAWAL".equals(transaction.getTransactionType()) || "WITHDRAW".equals(transaction.getTransactionType())) {
                     if (newBalance.compareTo(transaction.getAmount()) < 0) {
                         throw new Exception("Insufficient funds");
                     }

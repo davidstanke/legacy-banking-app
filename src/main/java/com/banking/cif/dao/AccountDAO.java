@@ -52,7 +52,6 @@ public class AccountDAO {
                     a.setProductCode(rs.getString("product_code"));
                     a.setAccountNumber(rs.getString("account_number"));
                     a.setBalance(rs.getBigDecimal("balance"));
-                    a.setCurrencyCode(rs.getString("currency_code"));
                     a.setStatus(rs.getString("status"));
                     return a;
                 }
@@ -86,7 +85,6 @@ public class AccountDAO {
                     a.setProductCode(rs.getString("product_code"));
                     a.setAccountNumber(rs.getString("account_number"));
                     a.setBalance(rs.getBigDecimal("balance"));
-                    a.setCurrencyCode(rs.getString("currency_code"));
                     a.setStatus(rs.getString("status"));
                     accounts.add(a);
                 }

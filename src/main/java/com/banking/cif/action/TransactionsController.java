@@ -11,18 +11,23 @@ import java.util.List;
 
 public class TransactionsController implements ModelDriven<Object> {
     
-    private String id; // transaction id
+    private String id; // transaction id or account id in custom route
     private Transaction model = new Transaction();
     private Collection<Transaction> list = null;
     private BankingService service = new BankingService();
     
-    // Parameter for listByAccount
+    // Parameter for listByAccount (legacy, can be removed if show() works)
     private String accountId;
 
     // Error response fields
     private int status;
     private String error;
     private String message;
+
+    // GET /api/v1/transactions
+    public HttpHeaders index() {
+        return new DefaultHttpHeaders("index").disableCaching();
+    }
 
     // POST /api/v1/transactions
     public HttpHeaders create() {
@@ -38,25 +43,22 @@ public class TransactionsController implements ModelDriven<Object> {
         }
     }
     
-    // Custom method for GET /api/v1/transactions/account/{accountId}
-    public String listByAccount() {
+    // GET /api/v1/transactions/account/{id}
+    public HttpHeaders show() {
         try {
-            Integer intAccountId = Integer.parseInt(accountId);
+            Integer intAccountId = Integer.parseInt(id);
             list = service.getTransactions(intAccountId);
-            return "index"; // Maps to JSON result
+            return new DefaultHttpHeaders("show").disableCaching();
         } catch (Exception e) {
              status = 400;
              error = "Error";
              message = e.getMessage();
-             return "error";
+             return new DefaultHttpHeaders("show").withStatus(400);
         }
     }
 
     public void setId(String id) { this.id = id; }
     public String getId() { return id; }
-
-    public void setAccountId(String accountId) { this.accountId = accountId; }
-    public String getAccountId() { return accountId; }
 
     @Override
     public Object getModel() {

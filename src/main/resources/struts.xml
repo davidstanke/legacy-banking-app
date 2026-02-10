@@ -20,11 +20,4 @@
         <action name="transactions" class="com.banking.cif.action.TransactionsController"/>
     </package>
 
-    <package name="custom-routes" extends="json-default" namespace="/api/v1/transactions/account">
-        <action name="*" class="com.banking.cif.action.TransactionsController" method="listByAccount">
-            <param name="accountId">{1}</param>
-            <result type="json"/>
-        </action>
-    </package>
-
 </struts>

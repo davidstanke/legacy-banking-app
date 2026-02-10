@@ -60,7 +60,7 @@ $(function() {
             this.accountId = options.accountId;
         },
         url: function() {
-            return '/api/v1/transactions/account/' + this.accountId;
+            return '/api/v1/transactions/' + this.accountId;
         },
         parse: function(response) {
              // The custom route might return the list directly or wrapped

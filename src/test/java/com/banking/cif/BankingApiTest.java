@@ -65,7 +65,6 @@ public class BankingApiTest {
         Account a = (Account) action.getModel();
         a.setCustomerId(customerId);
         a.setProductCode("CHK-STD");
-        a.setCurrencyCode("USD");
 
         action.create();
         assertEquals(201, action.getStatus());
@@ -111,11 +110,28 @@ public class BankingApiTest {
         t.setAccountId(accountId);
         t.setTransactionType("DEPOSIT");
         t.setAmount(new BigDecimal("500.00"));
-        t.setCurrencyCode("USD");
         
         action.create();
         assertEquals(201, action.getStatus());
         assertEquals(0, new BigDecimal("500.00").compareTo(t.getBalanceAfter()));
+    }
+
+    @Test
+    public void test05b_ListByAccount() throws Exception {
+        Integer customerId = createHelperCustomer("ListTest", "list@example.com", "CIF-LIST");
+        Integer accountId = createHelperAccount(customerId);
+        createHelperTransaction(accountId, "DEPOSIT", 100.00);
+        createHelperTransaction(accountId, "DEPOSIT", 200.00);
+
+        TransactionsController action = new TransactionsController();
+        action.setId(String.valueOf(accountId));
+        org.apache.struts2.rest.HttpHeaders headers = action.show();
+        
+        assertEquals(200, headers.getStatus());
+        Object model = action.getModel();
+        assertTrue(model instanceof java.util.Collection);
+        java.util.Collection<Transaction> txns = (java.util.Collection<Transaction>) model;
+        assertEquals(2, txns.size());
     }
 
     @Test
@@ -132,7 +148,6 @@ public class BankingApiTest {
         t.setAccountId(accountId);
         t.setTransactionType("WITHDRAWAL");
         t.setAmount(new BigDecimal("200.00"));
-        t.setCurrencyCode("USD");
 
         action.create();
         assertEquals(400, action.getStatus());
@@ -164,7 +179,6 @@ public class BankingApiTest {
         Account a = new Account();
         a.setCustomerId(customerId);
         a.setProductCode("CHK-STD");
-        a.setCurrencyCode("USD");
         return new com.banking.cif.service.BankingService().createAccount(a).getAccountId();
     }
     
@@ -173,7 +187,6 @@ public class BankingApiTest {
         t.setAccountId(accountId);
         t.setTransactionType(type);
         t.setAmount(new BigDecimal(amount));
-        t.setCurrencyCode("USD");
         new com.banking.cif.service.BankingService().processTransaction(t);
     }
 }

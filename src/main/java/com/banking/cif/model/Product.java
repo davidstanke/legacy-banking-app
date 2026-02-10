@@ -8,7 +8,6 @@ public class Product {
     private String category;
     private String description;
     private BigDecimal interestRate;
-    private String currencyCode;
     private boolean isActive;
 
     public String getProductCode() { return productCode; }
@@ -25,9 +24,6 @@ public class Product {
 
     public BigDecimal getInterestRate() { return interestRate; }
     public void setInterestRate(BigDecimal interestRate) { this.interestRate = interestRate; }
-
-    public String getCurrencyCode() { return currencyCode; }
-    public void setCurrencyCode(String currencyCode) { this.currencyCode = currencyCode; }
 
     public boolean isActive() { return isActive; }
     public void setActive(boolean isActive) { this.isActive = isActive; }
