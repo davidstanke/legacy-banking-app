@@ -67,6 +67,10 @@ public class BankingService {
         return a;
     }
 
+    public List<Account> getAccountsByCustomerId(String customerId) throws Exception {
+        return accountDAO.findByCustomerId(customerId);
+    }
+
     public void updateAccountStatus(String id, String status) throws Exception {
         if (accountDAO.findById(id) == null) throw new Exception("Account not found");
         accountDAO.updateStatus(id, status);

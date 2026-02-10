@@ -38,12 +38,16 @@ public class CustomersController implements ModelDriven<Object> {
     public HttpHeaders show() {
         try {
             model = service.getCustomer(id);
+            if (model != null) {
+                model.setAccounts(service.getAccountsByCustomerId(model.getCustomerId()));
+            }
         } catch (Exception e) {
             // If ID not found, try Name
             try {
                 List<Customer> customers = service.getCustomersByName(id);
                 if (customers != null && !customers.isEmpty()) {
                     model = customers.get(0); // Take the first match for lookup
+                    model.setAccounts(service.getAccountsByCustomerId(model.getCustomerId()));
                 } else {
                     status = 404;
                     error = "Not Found";

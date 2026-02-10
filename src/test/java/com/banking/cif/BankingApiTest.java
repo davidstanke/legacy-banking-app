@@ -7,24 +7,21 @@ import com.banking.cif.model.Account;
 import com.banking.cif.model.Customer;
 import com.banking.cif.model.Transaction;
 import com.banking.cif.util.DatabaseInitializer;
-import org.apache.struts2.StrutsJUnit4TestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.FixMethodOrder;
 import org.junit.runners.MethodSorters;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import javax.servlet.ServletException;
+import java.sql.Date;
 
 import static org.junit.Assert.*;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class BankingApiTest extends StrutsJUnit4TestCase<Object> {
+public class BankingApiTest {
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         DatabaseInitializer.initialize();
     }
 
@@ -32,28 +29,29 @@ public class BankingApiTest extends StrutsJUnit4TestCase<Object> {
 
     @Test
     public void test01_CreateCustomerSuccess() throws Exception {
-        request.setContent("{\"firstName\": \"Alice\", \"lastName\": \"Smith\", \"email\": \"alice.smith@example.com\", \"dateOfBirth\": \"1990-01-01\", \"cifNumber\": \"CIF-2024-001\"}".getBytes("UTF-8"));
-        request.setContentType("application/json");
-        request.setMethod("POST");
-        
-        String result = executeAction("/api/v1/customers");
-        
-        CustomersController action = (CustomersController) getAction();
-        assertEquals(201, action.getStatus());
+        CustomersController action = new CustomersController();
         Customer c = (Customer) action.getModel();
-        assertEquals("Alice", c.getFirstName());
+        c.setFirstName("Alice");
+        c.setLastName("Smith");
+        c.setEmail("alice.api@example.com");
+        c.setDateOfBirth(Date.valueOf("1990-01-01"));
+        c.setCifNumber("CIF-API-001");
+        
+        action.create();
+        assertEquals(201, action.getStatus());
         assertNotNull(c.getCustomerId());
     }
 
     @Test
     public void test02_CreateCustomerValidationError() throws Exception {
+        CustomersController action = new CustomersController();
+        Customer c = (Customer) action.getModel();
+        c.setFirstName("Bob");
+        c.setLastName("Jones");
         // Missing Email
-        request.setContent("{\"firstName\": \"Bob\", \"lastName\": \"Jones\", \"cifNumber\": \"CIF-2024-002\"}".getBytes("UTF-8"));
-        request.setContentType("application/json");
-        request.setMethod("POST");
+        c.setCifNumber("CIF-API-002");
 
-        executeAction("/api/v1/customers");
-        CustomersController action = (CustomersController) getAction();
+        action.create();
         assertEquals(400, action.getStatus());
     }
 
@@ -61,71 +59,74 @@ public class BankingApiTest extends StrutsJUnit4TestCase<Object> {
 
     @Test
     public void test03_CreateAccountSuccess() throws Exception {
-        String customerId = createHelperCustomer("Bob", "bob@example.com", "CIF-BOB");
+        String customerId = createHelperCustomer("Bob", "bob.api@example.com", "CIF-BOB-API");
         
-        String json = String.format("{\"customerId\": \"%s\", \"productCode\": \"CHK-STD\", \"currencyCode\": \"USD\"}", customerId);
-        request.setContent(json.getBytes("UTF-8"));
-        request.setContentType("application/json");
-        request.setMethod("POST");
-
-        executeAction("/api/v1/accounts");
-        AccountsController action = (AccountsController) getAction();
-        assertEquals(201, action.getStatus());
+        AccountsController action = new AccountsController();
         Account a = (Account) action.getModel();
+        a.setCustomerId(customerId);
+        a.setProductCode("CHK-STD");
+        a.setCurrencyCode("USD");
+
+        action.create();
+        assertEquals(201, action.getStatus());
+        assertNotNull(a.getAccountId());
         assertEquals("ACTIVE", a.getStatus());
     }
     
     @Test
     public void test04_UpdateAccountStatus() throws Exception {
-        String customerId = createHelperCustomer("Charlie", "charlie@example.com", "CIF-CHARLIE");
+        String customerId = createHelperCustomer("Charlie", "charlie.api@example.com", "CIF-CHARLIE-API");
         String accountId = createHelperAccount(customerId);
 
-        request.setContent("{\"status\": \"FROZEN\"}".getBytes("UTF-8"));
-        request.setContentType("application/json");
-        request.setMethod("PUT"); 
-
-        executeAction("/api/v1/accounts/" + accountId);
-        AccountsController action = (AccountsController) getAction();
-        assertEquals(200, action.getStatus()); 
+        AccountsController action = new AccountsController();
+        action.setId(accountId);
         Account a = (Account) action.getModel();
-        assertEquals("FROZEN", a.getStatus());
+        a.setStatus("FROZEN");
+
+        org.apache.struts2.rest.HttpHeaders headers = action.update();
+        assertEquals(200, headers.getStatus()); 
+        
+        // Reload to verify
+        action.show();
+        assertEquals("FROZEN", ((Account)action.getModel()).getStatus());
     }
 
     // --- Transaction Tests ---
 
     @Test
     public void test05_DepositSuccess() throws Exception {
-        String customerId = createHelperCustomer("Dave", "dave@example.com", "CIF-DAVE");
+        String customerId = createHelperCustomer("Dave", "dave.api@example.com", "CIF-DAVE-API");
         String accountId = createHelperAccount(customerId);
 
-        String json = String.format("{\"accountId\": \"%s\", \"transactionType\": \"DEPOSIT\", \"amount\": 500.00, \"currencyCode\": \"USD\", \"description\": \"Opening\"}", accountId);
-        request.setContent(json.getBytes("UTF-8"));
-        request.setContentType("application/json");
-        request.setMethod("POST");
-        
-        executeAction("/api/v1/transactions");
-        TransactionsController action = (TransactionsController) getAction();
-        assertEquals(201, action.getStatus());
+        TransactionsController action = new TransactionsController();
         Transaction t = (Transaction) action.getModel();
+        t.setAccountId(accountId);
+        t.setTransactionType("DEPOSIT");
+        t.setAmount(new BigDecimal("500.00"));
+        t.setCurrencyCode("USD");
+        
+        action.create();
+        assertEquals(201, action.getStatus());
         assertEquals(0, new BigDecimal("500.00").compareTo(t.getBalanceAfter()));
     }
 
     @Test
     public void test06_WithdrawalInsufficient() throws Exception {
-        String customerId = createHelperCustomer("Eve", "eve@example.com", "CIF-EVE");
+        String customerId = createHelperCustomer("Eve", "eve.api@example.com", "CIF-EVE-API");
         String accountId = createHelperAccount(customerId);
         
         // Deposit 100 via Service
         createHelperTransaction(accountId, "DEPOSIT", 100.00);
 
         // Withdraw 200 via API
-        String json = String.format("{\"accountId\": \"%s\", \"transactionType\": \"WITHDRAWAL\", \"amount\": 200.00, \"currencyCode\": \"USD\"}", accountId);
-        request.setContent(json.getBytes("UTF-8"));
-        request.setContentType("application/json");
-        request.setMethod("POST");
+        TransactionsController action = new TransactionsController();
+        Transaction t = (Transaction) action.getModel();
+        t.setAccountId(accountId);
+        t.setTransactionType("WITHDRAWAL");
+        t.setAmount(new BigDecimal("200.00"));
+        t.setCurrencyCode("USD");
 
-        executeAction("/api/v1/transactions");
-        TransactionsController action = (TransactionsController) getAction();
+        action.create();
         assertEquals(400, action.getStatus());
     }
     

@@ -94,6 +94,32 @@ public class BankingServiceTest {
         assertEquals(0, new BigDecimal("60.00").compareTo(result2.getBalanceAfter()));
     }
 
+    @Test
+    public void testGetAccountsByCustomerId() throws Exception {
+        Customer c = new Customer();
+        c.setFirstName("Eve");
+        c.setLastName("Online");
+        c.setEmail("eve.service@example.com");
+        c.setDateOfBirth(Date.valueOf("1990-01-01"));
+        c.setCifNumber("CIF-SERVICE-005");
+        String customerId = service.createCustomer(c).getCustomerId();
+
+        Account a1 = new Account();
+        a1.setCustomerId(customerId);
+        a1.setProductCode("CHK-STD");
+        a1.setCurrencyCode("USD");
+        service.createAccount(a1);
+
+        Account a2 = new Account();
+        a2.setCustomerId(customerId);
+        a2.setProductCode("SAV-HYS");
+        a2.setCurrencyCode("USD");
+        service.createAccount(a2);
+
+        java.util.List<Account> accounts = service.getAccountsByCustomerId(customerId);
+        assertEquals(2, accounts.size());
+    }
+
     @Test(expected = Exception.class)
     public void testWithdrawalInsufficient() throws Exception {
         Customer c = new Customer();

@@ -21,6 +21,7 @@ public class Customer {
     private String riskRating;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private java.util.List<Account> accounts;
 
     public String getCustomerId() { return customerId; }
     public void setCustomerId(String customerId) { this.customerId = customerId; }
@@ -72,4 +73,7 @@ public class Customer {
 
     public Timestamp getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
+
+    public java.util.List<Account> getAccounts() { return accounts; }
+    public void setAccounts(java.util.List<Account> accounts) { this.accounts = accounts; }
 }

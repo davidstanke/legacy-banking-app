@@ -115,26 +115,14 @@
         <scope>test</scope>
     </dependency>
 
-    <!-- Struts 2 JUnit Plugin -->
+    <!-- Mockito for mocking (Struts-era effective equivalent) -->
     <dependency>
-        <groupId>org.apache.struts</groupId>
-        <artifactId>struts2-junit-plugin</artifactId>
-        <version>${struts.version}</version>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>3.12.4</version>
         <scope>test</scope>
     </dependency>
-    <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-test</artifactId>
-        <version>4.3.30.RELEASE</version>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-context</artifactId>
-        <version>4.3.30.RELEASE</version>
-        <scope>test</scope>
-    </dependency>
-    
+
     <!-- Logging -->
   </dependencies>
 

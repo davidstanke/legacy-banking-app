@@ -99,6 +99,34 @@
                 <p><strong>KYC Status:</strong> <%= kycStatus %></p>
                 <p><strong>Risk Rating:</strong> <%= riskRating %></p>
                 <hr>
+                <h4>Accounts</h4>
+                <% if (typeof accounts !== 'undefined' && accounts.length > 0) { %>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Account Number</th>
+                                <th>Product</th>
+                                <th>Balance</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% _.each(accounts, function(account) { %>
+                                <tr>
+                                    <td><%= account.accountNumber %></td>
+                                    <td><%= account.productCode %></td>
+                                    <td><%= account.currencyCode %> <%= account.balance %></td>
+                                    <td><%= account.status %></td>
+                                    <td><a href="#accounts/<%= account.accountId %>" class="btn btn-small">View</a></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p>No accounts found for this customer.</p>
+                <% } %>
+                <hr>
                 <button class="btn btn-danger delete-customer">Delete Record</button>
             </div>
         </div>

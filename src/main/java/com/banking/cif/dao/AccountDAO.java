@@ -68,6 +68,30 @@ public class AccountDAO {
             pstmt.executeUpdate();
         }
     }
+
+    public java.util.List<Account> findByCustomerId(String customerId) throws SQLException {
+        java.util.List<Account> accounts = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM accounts WHERE customer_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, customerId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Account a = new Account();
+                    a.setAccountId(rs.getString("account_id"));
+                    a.setCustomerId(rs.getString("customer_id"));
+                    a.setProductCode(rs.getString("product_code"));
+                    a.setAccountNumber(rs.getString("account_number"));
+                    a.setBalance(rs.getBigDecimal("balance"));
+                    a.setCurrencyCode(rs.getString("currency_code"));
+                    a.setStatus(rs.getString("status"));
+                    accounts.add(a);
+                }
+            }
+        }
+        return accounts;
+    }
     
     // For transactions - update balance
     public void updateBalance(Connection conn, String accountId, BigDecimal newBalance) throws SQLException {
