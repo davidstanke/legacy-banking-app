@@ -1,5 +1,6 @@
 package com.banking.cif.action;
 
+import com.banking.cif.dao.CustomerDAO;
 import com.banking.cif.model.Customer;
 import com.banking.cif.service.BankingService;
 import com.banking.cif.util.DatabaseInitializer;
@@ -21,6 +22,7 @@ public class CustomersController implements ModelDriven<Object> {
     private Customer model = new Customer();
     private Collection<Customer> list = null;
     private BankingService service = new BankingService();
+    private CustomerDAO customerDAO = new CustomerDAO();
 
     // Error response fields
     private int status;
@@ -30,7 +32,8 @@ public class CustomersController implements ModelDriven<Object> {
     // GET /api/v1/customers
     public HttpHeaders index() {
         try {
-            list = service.getAllCustomers();
+            // Bad Practice: Direct DAO access in Controller
+            list = customerDAO.findAllWithAccountCount();
         } catch (Exception e) {
             status = 500;
             error = "Internal Server Error";
@@ -92,7 +95,17 @@ public class CustomersController implements ModelDriven<Object> {
     // POST /api/v1/customers
     public HttpHeaders create() {
         try {
-            service.createCustomer(model);
+            // Bad Practice: Logic in Controller
+            if (customerDAO.emailExists(model.getEmail())) {
+                throw new Exception("Email already exists");
+            }
+            
+            // Bad Practice: Generation logic in Controller
+            if (model.getCifNumber() == null || model.getCifNumber().isEmpty()) {
+                 model.setCifNumber("CIF-" + System.currentTimeMillis());
+            }
+
+            customerDAO.create(model);
             status = 201;
             return new DefaultHttpHeaders("create").withStatus(201);
         } catch (Exception e) {

@@ -1,6 +1,10 @@
 package com.banking.cif.action;
 
+import com.banking.cif.dao.AccountDAO;
+import com.banking.cif.dao.CustomerDAO;
+import com.banking.cif.dao.ProductDAO;
 import com.banking.cif.model.Account;
+import com.banking.cif.model.Product;
 import com.banking.cif.service.BankingService;
 import com.opensymphony.xwork2.ModelDriven;
 import org.apache.struts2.rest.DefaultHttpHeaders;
@@ -16,6 +20,9 @@ public class AccountsController implements ModelDriven<Object> {
     private String id;
     private Account model = new Account();
     private BankingService service = new BankingService();
+    private AccountDAO accountDAO = new AccountDAO();
+    private ProductDAO productDAO = new ProductDAO();
+    private CustomerDAO customerDAO = new CustomerDAO();
 
     // Error response fields
     private int status;
@@ -62,7 +69,17 @@ public class AccountsController implements ModelDriven<Object> {
     // POST /api/v1/accounts
     public HttpHeaders create() {
         try {
-            service.createAccount(model);
+            // Bad Practice: Business Logic in Controller
+            Product p = productDAO.findByCode(model.getProductCode());
+            if (p == null) {
+                throw new Exception("Invalid Product Code");
+            }
+            // validate customer exists
+            if (customerDAO.findById(model.getCustomerId()) == null) {
+                throw new Exception("Customer not found");
+            }
+
+            accountDAO.create(model);
             status = 201;
             return new DefaultHttpHeaders("create").withStatus(201);
         } catch (Exception e) {
@@ -79,9 +96,10 @@ public class AccountsController implements ModelDriven<Object> {
             Integer intId = Integer.parseInt(id);
             // Check if it's a status update
             if (model.getStatus() != null) {
-                service.updateAccountStatus(intId, model.getStatus());
+                // Bad Practice: Direct DAO Call
+                accountDAO.updateStatus(intId, model.getStatus());
                 // Refresh model to return updated object
-                model = service.getAccount(intId);
+                model = accountDAO.findById(intId);
                 return new DefaultHttpHeaders("update").withStatus(200);
             }
             return new DefaultHttpHeaders("update").withStatus(200);
