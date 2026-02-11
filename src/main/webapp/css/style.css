@@ -168,3 +168,49 @@ label {
     background-color: #FFF0F0;
     border-color: #CC0000;
 }
+
+/* Notification Bar */
+#notification-bar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    z-index: 9999;
+    border-bottom: 2px solid #333;
+}
+
+.notif-success {
+    background-color: #DFF0D8;
+    color: #3C763D;
+    border-color: #D6E9C6;
+}
+
+.notif-error {
+    background-color: #F2DEDE;
+    color: #A94442;
+    border-color: #EBCCD1;
+}
+
+/* Row Hover & Selection */
+.table tr.row-highlight {
+    background-color: #FFFFCC !important;
+    cursor: pointer;
+}
+
+.table tr.row-hover {
+    background-color: #F5F5F5;
+}
+
+/* Loading States */
+.btn-loading {
+    background-color: #666 !important;
+    cursor: wait !important;
+}
+
+.form-loading {
+    opacity: 0.6;
+}

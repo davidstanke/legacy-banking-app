@@ -1,5 +1,17 @@
 $(function() {
     
+    // --- Helpers ---
+    
+    window.showNotification = function(message, type) {
+        var $bar = $('#notification-bar');
+        $bar.removeClass('notif-success notif-error')
+            .addClass(type === 'error' ? 'notif-error' : 'notif-success')
+            .text(message)
+            .slideDown(200)
+            .delay(3000)
+            .slideUp(200);
+    };
+
     // --- Models ---
     
     var Customer = Backbone.Model.extend({
@@ -94,7 +106,7 @@ $(function() {
         el: '#main-container',
         template: _.template($('#home-template').html()),
         render: function() {
-            this.$el.html(this.template());
+            this.$el.hide().html(this.template()).fadeIn(300);
             return this;
         }
     });
@@ -102,10 +114,20 @@ $(function() {
     var CustomerListView = Backbone.View.extend({
         el: '#main-container',
         template: _.template($('#customer-list-template').html()),
+        events: {
+            'mouseenter tr': 'highlightRow',
+            'mouseleave tr': 'unhighlightRow'
+        },
         render: function() {
             var self = this;
-            this.$el.html(this.template({customers: this.collection.toJSON()}));
+            this.$el.hide().html(this.template({customers: this.collection.toJSON()})).fadeIn(300);
             return this;
+        },
+        highlightRow: function(e) {
+            $(e.currentTarget).addClass('row-hover');
+        },
+        unhighlightRow: function(e) {
+            $(e.currentTarget).removeClass('row-hover');
         }
     });
 
@@ -117,37 +139,46 @@ $(function() {
             'submit #inline-create-account-form': 'createAccount'
         },
         render: function() {
-            this.$el.html(this.template(this.model.toJSON()));
+            this.$el.hide().html(this.template(this.model.toJSON())).fadeIn(300);
             return this;
         },
         createAccount: function(e) {
             e.preventDefault();
+            var $form = $(e.target);
+            var $btn = $form.find('button[type="submit"]');
+            var originalBtnText = $btn.text();
+
             var data = {
                 customerId: this.$('input[name="customerId"]').val(),
                 productCode: this.$('select[name="productCode"]').val(),
                 balance: parseFloat(this.$('input[name="balance"]').val())
             };
 
+            $btn.text('Processing...').addClass('btn-loading').prop('disabled', true);
+            $form.addClass('form-loading');
+
             var account = new Account();
             account.save(data, {
                 success: function(model, response) {
-                    alert('Account created');
+                    showNotification('Account created successfully', 'success');
                     Backbone.history.loadUrl(Backbone.history.fragment); // Reload
                 },
                 error: function(model, response) {
-                    alert('Error creating account: ' + (response.responseJSON ? response.responseJSON.message : response.statusText));
+                    $btn.text(originalBtnText).removeClass('btn-loading').prop('disabled', false);
+                    $form.removeClass('form-loading');
+                    showNotification('Error: ' + (response.responseJSON ? response.responseJSON.message : response.statusText), 'error');
                 }
             });
         },
         deleteCustomer: function() {
-            if(confirm('Are you sure?')) {
+            if(confirm('Are you sure you want to delete this customer?')) {
                 this.model.destroy({
                     success: function() {
-                        alert('Customer deleted');
+                        showNotification('Customer deleted', 'success');
                         app.navigate('', {trigger: true});
                     },
                     error: function(model, response) {
-                        alert('Error deleting customer: ' + (response.responseJSON ? response.responseJSON.message : response.statusText));
+                        showNotification('Error: ' + (response.responseJSON ? response.responseJSON.message : response.statusText), 'error');
                     }
                 });
             }
@@ -161,11 +192,15 @@ $(function() {
             'submit #create-customer-form': 'createCustomer'
         },
         render: function() {
-            this.$el.html(this.template());
+            this.$el.hide().html(this.template()).fadeIn(300);
             return this;
         },
         createCustomer: function(e) {
             e.preventDefault();
+            var $form = $(e.target);
+            var $btn = $form.find('button[type="submit"]');
+            var originalBtnText = $btn.text();
+
             var data = {
                 firstName: this.$('input[name="firstName"]').val(),
                 lastName: this.$('input[name="lastName"]').val(),
@@ -176,14 +211,19 @@ $(function() {
             };
             if(!data.customerId) delete data.customerId;
 
+            $btn.text('Registering...').addClass('btn-loading').prop('disabled', true);
+            $form.addClass('form-loading');
+
             var customer = new Customer();
             customer.save(data, {
                 success: function(model, response) {
-                    alert('Customer created with ID: ' + model.id); // model.id maps to customerId
+                    showNotification('Customer registered successfully', 'success');
                     app.navigate('customers/' + model.id, {trigger: true});
                 },
                 error: function(model, response) {
-                    alert('Error creating customer: ' + (response.responseJSON ? response.responseJSON.message : response.statusText));
+                    $btn.text(originalBtnText).removeClass('btn-loading').prop('disabled', false);
+                    $form.removeClass('form-loading');
+                    showNotification('Error: ' + (response.responseJSON ? response.responseJSON.message : response.statusText), 'error');
                 }
             });
         }
@@ -202,7 +242,7 @@ $(function() {
         },
         render: function() {
             var self = this;
-            this.$el.html(this.template(this.model.toJSON()));
+            this.$el.hide().html(this.template(this.model.toJSON())).fadeIn(300);
             
             // Fetch transactions
             this.transactions.fetch({
@@ -223,13 +263,17 @@ $(function() {
         toggleTargetAccount: function(e) {
             var type = $(e.target).val();
             if (type === 'TRANSFER') {
-                this.$('#inline-target-account-group').show();
+                this.$('#inline-target-account-group').slideDown(200);
             } else {
-                this.$('#inline-target-account-group').hide();
+                this.$('#inline-target-account-group').slideUp(200);
             }
         },
         createTransaction: function(e) {
             e.preventDefault();
+            var $form = $(e.target);
+            var $btn = $form.find('button[type="submit"]');
+            var originalBtnText = $btn.text();
+
             var type = this.$('#inline-create-transaction-form select[name="transactionType"]').val();
             var data = {
                 transactionType: type,
@@ -240,29 +284,34 @@ $(function() {
                 data.targetAccountId = this.$('#inline-create-transaction-form input[name="targetAccountId"]').val();
             }
 
+            $btn.text('Processing...').addClass('btn-loading').prop('disabled', true);
+            $form.addClass('form-loading');
+
             var txn = new Transaction();
             txn.save(data, {
                 success: function(model, response) {
-                    alert('Transaction processed');
+                    showNotification('Transaction completed', 'success');
                     Backbone.history.loadUrl(Backbone.history.fragment); // Reload
                 },
                 error: function(model, response) {
-                     alert('Error processing transaction: ' + (response.responseJSON ? response.responseJSON.message : response.statusText));
+                    $btn.text(originalBtnText).removeClass('btn-loading').prop('disabled', false);
+                    $form.removeClass('form-loading');
+                    showNotification('Error: ' + (response.responseJSON ? response.responseJSON.message : response.statusText), 'error');
                 }
             });
         },
         closeAccount: function() {
-            // Simulate closing by updating status (if API supported it fully)
-            // The API supports updating status via PUT/UPDATE
-            this.model.save({status: 'CLOSED'}, {
-                success: function() {
-                    alert('Account closed');
-                    Backbone.history.loadUrl(Backbone.history.fragment); // Reload
-                },
-                error: function(model, response) {
-                    alert('Error closing account: ' + (response.responseJSON ? response.responseJSON.message : response.statusText));
-                }
-            });
+            if(confirm('Are you sure you want to deactivate this account?')) {
+                this.model.save({status: 'CLOSED'}, {
+                    success: function() {
+                        showNotification('Account deactivated', 'success');
+                        Backbone.history.loadUrl(Backbone.history.fragment); // Reload
+                    },
+                    error: function(model, response) {
+                        showNotification('Error: ' + (response.responseJSON ? response.responseJSON.message : response.statusText), 'error');
+                    }
+                });
+            }
         }
     });
 
@@ -282,25 +331,34 @@ $(function() {
             'submit #create-account-form': 'createAccount'
         },
         render: function() {
-            this.$el.html(this.template());
+            this.$el.hide().html(this.template()).fadeIn(300);
             return this;
         },
         createAccount: function(e) {
             e.preventDefault();
+            var $form = $(e.target);
+            var $btn = $form.find('button[type="submit"]');
+            var originalBtnText = $btn.text();
+
             var data = {
                 customerId: this.$('input[name="customerId"]').val(),
                 productCode: this.$('select[name="productCode"]').val(),
                 balance: parseFloat(this.$('input[name="balance"]').val())
             };
 
+            $btn.text('Opening...').addClass('btn-loading').prop('disabled', true);
+            $form.addClass('form-loading');
+
             var account = new Account();
             account.save(data, {
                 success: function(model, response) {
-                    alert('Account created');
+                    showNotification('New account opened', 'success');
                     app.navigate('accounts/' + model.id, {trigger: true});
                 },
                 error: function(model, response) {
-                    alert('Error creating account: ' + (response.responseJSON ? response.responseJSON.message : response.statusText));
+                    $btn.text(originalBtnText).removeClass('btn-loading').prop('disabled', false);
+                    $form.removeClass('form-loading');
+                    showNotification('Error: ' + (response.responseJSON ? response.responseJSON.message : response.statusText), 'error');
                 }
             });
         }
@@ -314,19 +372,23 @@ $(function() {
             'change select[name="transactionType"]': 'toggleTargetAccount'
         },
         render: function() {
-            this.$el.html(this.template());
+            this.$el.hide().html(this.template()).fadeIn(300);
             return this;
         },
         toggleTargetAccount: function(e) {
             var type = $(e.target).val();
             if (type === 'TRANSFER') {
-                this.$('#target-account-group').show();
+                this.$('#target-account-group').slideDown(200);
             } else {
-                this.$('#target-account-group').hide();
+                this.$('#target-account-group').slideUp(200);
             }
         },
         createTransaction: function(e) {
             e.preventDefault();
+            var $form = $(e.target);
+            var $btn = $form.find('button[type="submit"]');
+            var originalBtnText = $btn.text();
+
             var type = this.$('select[name="transactionType"]').val();
             var data = {
                 transactionType: type,
@@ -337,14 +399,19 @@ $(function() {
                 data.targetAccountId = this.$('input[name="targetAccountId"]').val();
             }
 
+            $btn.text('Processing...').addClass('btn-loading').prop('disabled', true);
+            $form.addClass('form-loading');
+
             var txn = new Transaction();
             txn.save(data, {
                 success: function(model, response) {
-                    alert('Transaction processed');
+                    showNotification('Transaction completed', 'success');
                     app.navigate('accounts/' + data.accountId, {trigger: true});
                 },
                 error: function(model, response) {
-                     alert('Error processing transaction: ' + (response.responseJSON ? response.responseJSON.message : response.statusText));
+                    $btn.text(originalBtnText).removeClass('btn-loading').prop('disabled', false);
+                    $form.removeClass('form-loading');
+                    showNotification('Error: ' + (response.responseJSON ? response.responseJSON.message : response.statusText), 'error');
                 }
             });
         }
@@ -354,7 +421,7 @@ $(function() {
         el: '#main-container',
         template: _.template($('#error-template').html()),
         render: function(message) {
-            this.$el.html(this.template({message: message}));
+            this.$el.hide().html(this.template({message: message})).fadeIn(300);
             return this;
         }
     });
