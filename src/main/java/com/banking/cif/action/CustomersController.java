@@ -29,8 +29,14 @@ public class CustomersController implements ModelDriven<Object> {
 
     // GET /api/v1/customers
     public HttpHeaders index() {
-        // Not strictly in spec, but good for debug
-        // list = service.getAllCustomers(); 
+        try {
+            list = service.getAllCustomers();
+        } catch (Exception e) {
+            status = 500;
+            error = "Internal Server Error";
+            message = e.getMessage();
+            return new DefaultHttpHeaders("index").withStatus(500);
+        }
         return new DefaultHttpHeaders("index").disableCaching();
     }
 

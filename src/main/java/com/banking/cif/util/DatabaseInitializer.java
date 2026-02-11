@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.util.Random;
 
 public class DatabaseInitializer {
 
@@ -31,7 +32,7 @@ public class DatabaseInitializer {
 
             stmt.execute("CREATE TABLE products (product_code VARCHAR(50) PRIMARY KEY, name VARCHAR(100) NOT NULL, category VARCHAR(50) NOT NULL, interest_rate NUMERIC(5, 4), is_active BOOLEAN DEFAULT TRUE)");
             stmt.execute("CREATE TABLE customers (customer_id SERIAL PRIMARY KEY, cif_number VARCHAR(20) UNIQUE NOT NULL, first_name VARCHAR(100) NOT NULL, last_name VARCHAR(100) NOT NULL, date_of_birth DATE NOT NULL, email VARCHAR(150) UNIQUE NOT NULL, phone_number VARCHAR(20), address_line1 VARCHAR(255), city VARCHAR(100), state VARCHAR(100), postal_code VARCHAR(20), country_code CHAR(2), kyc_status VARCHAR(20) DEFAULT 'PENDING', kyc_documents VARCHAR(4000) DEFAULT '{}', risk_rating VARCHAR(10) DEFAULT 'LOW', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-            stmt.execute("CREATE TABLE accounts (account_id SERIAL PRIMARY KEY, customer_id INTEGER NOT NULL, product_code VARCHAR(50) NOT NULL, account_number VARCHAR(30) UNIQUE NOT NULL, iban VARCHAR(34), balance NUMERIC(15, 2) DEFAULT 0.00, overdraft_limit NUMERIC(15, 2) DEFAULT 0.00, status VARCHAR(20) DEFAULT 'ACTIVE', opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, closed_at TIMESTAMP, configurations VARCHAR(4000) DEFAULT '{}', FOREIGN KEY (customer_id) REFERENCES customers(customer_id), FOREIGN KEY (product_code) REFERENCES products(product_code))");
+            stmt.execute("CREATE TABLE accounts (account_id SERIAL PRIMARY KEY, customer_id INTEGER NOT NULL, product_code VARCHAR(50) NOT NULL, account_number INTEGER UNIQUE NOT NULL, iban VARCHAR(34), balance NUMERIC(15, 2) DEFAULT 0.00, overdraft_limit NUMERIC(15, 2) DEFAULT 0.00, status VARCHAR(20) DEFAULT 'ACTIVE', opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, closed_at TIMESTAMP, configurations VARCHAR(4000) DEFAULT '{}', FOREIGN KEY (customer_id) REFERENCES customers(customer_id), FOREIGN KEY (product_code) REFERENCES products(product_code))");
             stmt.execute("CREATE TABLE transactions (transaction_id SERIAL PRIMARY KEY, account_id INTEGER NOT NULL, reference_code VARCHAR(50), transaction_type VARCHAR(20) NOT NULL, amount NUMERIC(15, 2) NOT NULL, description VARCHAR(1000), transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, balance_after NUMERIC(15, 2), FOREIGN KEY (account_id) REFERENCES accounts(account_id))");
 
             stmt.execute("INSERT INTO products (product_code, name, category, interest_rate) VALUES ('CHK-STD', 'Standard Checking', 'CHECKING', 0.00), ('SAV-HYS', 'High Yield Savings', 'SAVINGS', 0.045)");
@@ -43,16 +44,17 @@ public class DatabaseInitializer {
                 "(3, 'CIF-100003', 'Frodo', 'Baggins', '1984-03-03', 'frodo.baggins@example.com', 'COMPLETED')");
 
             System.out.println("Seeding Accounts...");
+            Random rand = new Random();
             stmt.execute("INSERT INTO accounts (account_id, customer_id, product_code, account_number, balance, status) VALUES " +
-                "(1, 1, 'CHK-STD', 'ACC-JOHN-1', 1500.00, 'ACTIVE')," +
-                "(2, 1, 'SAV-HYS', 'ACC-JOHN-2', 5000.00, 'ACTIVE')," +
-                "(3, 1, 'CHK-STD', 'ACC-JOHN-3', 250.00, 'ACTIVE')," +
-                "(4, 2, 'CHK-STD', 'ACC-JANE-1', 3200.00, 'ACTIVE')," +
-                "(5, 2, 'SAV-HYS', 'ACC-JANE-2', 12000.00, 'ACTIVE')," +
-                "(6, 3, 'CHK-STD', 'ACC-FRODO-1', 50.00, 'ACTIVE')," +
-                "(7, 3, 'SAV-HYS', 'ACC-FRODO-2', 1000.00, 'ACTIVE')," +
-                "(8, 3, 'CHK-STD', 'ACC-FRODO-3', 75.00, 'ACTIVE')," +
-                "(9, 3, 'SAV-HYS', 'ACC-FRODO-4', 2500.00, 'ACTIVE')");
+                "(1, 1, 'CHK-STD', " + (11111111 + rand.nextInt(88888889)) + ", 1500.00, 'ACTIVE')," +
+                "(2, 1, 'SAV-HYS', " + (11111111 + rand.nextInt(88888889)) + ", 5000.00, 'ACTIVE')," +
+                "(3, 1, 'CHK-STD', " + (11111111 + rand.nextInt(88888889)) + ", 250.00, 'ACTIVE')," +
+                "(4, 2, 'CHK-STD', " + (11111111 + rand.nextInt(88888889)) + ", 3200.00, 'ACTIVE')," +
+                "(5, 2, 'SAV-HYS', " + (11111111 + rand.nextInt(88888889)) + ", 12000.00, 'ACTIVE')," +
+                "(6, 3, 'CHK-STD', " + (11111111 + rand.nextInt(88888889)) + ", 50.00, 'ACTIVE')," +
+                "(7, 3, 'SAV-HYS', " + (11111111 + rand.nextInt(88888889)) + ", 1000.00, 'ACTIVE')," +
+                "(8, 3, 'CHK-STD', " + (11111111 + rand.nextInt(88888889)) + ", 75.00, 'ACTIVE')," +
+                "(9, 3, 'SAV-HYS', " + (11111111 + rand.nextInt(88888889)) + ", 2500.00, 'ACTIVE')");
 
             System.out.println("Seeding Transactions (John)...");
             // John Acc 1: 10 txns

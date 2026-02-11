@@ -22,6 +22,7 @@ public class Customer {
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private java.util.List<Account> accounts;
+    private Integer accountCount;
 
     public Integer getCustomerId() { return customerId; }
     public void setCustomerId(Integer customerId) { this.customerId = customerId; }
@@ -76,4 +77,7 @@ public class Customer {
 
     public java.util.List<Account> getAccounts() { return accounts; }
     public void setAccounts(java.util.List<Account> accounts) { this.accounts = accounts; }
+
+    public Integer getAccountCount() { return accountCount; }
+    public void setAccountCount(Integer accountCount) { this.accountCount = accountCount; }
 }

@@ -4,13 +4,15 @@ import com.banking.cif.model.Account;
 import com.banking.cif.util.DBConnection;
 import java.sql.*;
 import java.math.BigDecimal;
+import java.util.Random;
 
 public class AccountDAO {
 
     public Account create(Account account) throws SQLException {
-        // Generate account number? Demo logic: Time-based or Random
+        // Generate account number? Demo logic: Random integer between 11111111 and 99999999
         if (account.getAccountNumber() == null) {
-            account.setAccountNumber(String.valueOf(System.currentTimeMillis())); 
+            Random rand = new Random();
+            account.setAccountNumber(String.valueOf(11111111 + rand.nextInt(88888889))); 
         }
         account.setStatus("ACTIVE");
         account.setBalance(BigDecimal.ZERO);

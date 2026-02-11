@@ -54,6 +54,20 @@ $(function() {
 
     // --- Collections ---
 
+    var CustomersCollection = Backbone.Collection.extend({
+        model: Customer,
+        url: '/api/v1/customers',
+        parse: function(response) {
+            if (response && response.model && Array.isArray(response.model)) {
+                return response.model;
+            }
+            if (Array.isArray(response)) {
+                return response;
+            }
+            return response;
+        }
+    });
+
     var TransactionsCollection = Backbone.Collection.extend({
         model: Transaction,
         initialize: function(models, options) {
@@ -81,6 +95,16 @@ $(function() {
         template: _.template($('#home-template').html()),
         render: function() {
             this.$el.html(this.template());
+            return this;
+        }
+    });
+
+    var CustomerListView = Backbone.View.extend({
+        el: '#main-container',
+        template: _.template($('#customer-list-template').html()),
+        render: function() {
+            var self = this;
+            this.$el.html(this.template({customers: this.collection.toJSON()}));
             return this;
         }
     });
@@ -340,6 +364,7 @@ $(function() {
     var AppRouter = Backbone.Router.extend({
         routes: {
             '': 'home',
+            'customers': 'listCustomers',
             'customers/new': 'createCustomer',
             'customers/:id': 'viewCustomer',
             'accounts/new': 'createAccount',
@@ -349,6 +374,19 @@ $(function() {
 
         home: function() {
             new HomeView().render();
+        },
+
+        listCustomers: function() {
+            var customers = new CustomersCollection();
+            customers.fetch({
+                success: function() {
+                    new CustomerListView({collection: customers}).render();
+                },
+                error: function(collection, response) {
+                    var msg = (response.responseJSON && response.responseJSON.message) ? response.responseJSON.message : 'Error loading customers';
+                    new ErrorView().render(msg);
+                }
+            });
         },
 
         createCustomer: function() {

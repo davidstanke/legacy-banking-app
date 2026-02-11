@@ -67,6 +67,21 @@ public class CustomerDAO {
         }
         return customers;
     }
+
+    public List<Customer> findAllWithAccountCount() throws SQLException {
+        List<Customer> customers = new ArrayList<>();
+        String sql = "SELECT c.*, (SELECT COUNT(*) FROM accounts a WHERE a.customer_id = c.customer_id) as account_count FROM customers c ORDER BY c.last_name, c.first_name";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                Customer c = mapResultSetToCustomer(rs);
+                c.setAccountCount(rs.getInt("account_count"));
+                customers.add(c);
+            }
+        }
+        return customers;
+    }
     
     public boolean emailExists(String email) throws SQLException {
         String sql = "SELECT 1 FROM customers WHERE email = ?";

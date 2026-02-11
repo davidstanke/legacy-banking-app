@@ -29,6 +29,7 @@
             <h3>Navigation</h3>
             <ul>
                 <li><a href="#">Dashboard</a></li>
+                <li><a href="#customers">Customer List</a></li>
                 <li><a href="#customers/new">New Customer</a></li>
                 <li><a href="#accounts/new">New Account</a></li>
                 <li><a href="#transactions/new">New Transaction</a></li>
@@ -85,6 +86,43 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </script>
+
+    <script type="text/template" id="customer-list-template">
+        <div class="content-box">
+            <div style="float: right;">
+                <a href="#customers/new" class="btn">Register New Customer</a>
+            </div>
+            <h2>Customer Directory</h2>
+            <div class="card">
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>CIF Number</th>
+                                <th>Email</th>
+                                <th>Accounts</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% _.each(customers, function(customer) { %>
+                                <tr>
+                                    <td><%= customer.lastName %>, <%= customer.firstName %></td>
+                                    <td><%= customer.cifNumber %></td>
+                                    <td><%= customer.email %></td>
+                                    <td><span class="badge"><%= customer.accountCount %></span></td>
+                                    <td>
+                                        <a href="#customers/<%= customer.customerId %>" class="btn btn-small">View Profile</a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </script>
 

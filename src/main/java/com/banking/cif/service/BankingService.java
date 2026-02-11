@@ -46,6 +46,10 @@ public class BankingService {
         return customerDAO.findByName(name);
     }
 
+    public List<Customer> getAllCustomers() throws Exception {
+        return customerDAO.findAllWithAccountCount();
+    }
+
     // --- Account Operations ---
 
     public Account createAccount(Account account) throws Exception {
